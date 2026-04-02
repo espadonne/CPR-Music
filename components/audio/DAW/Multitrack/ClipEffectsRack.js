@@ -316,18 +316,26 @@ export default function ClipEffectsRack({ show, onHide, selectedClipId, logOpera
   }, [selectedClip, selectedClipId, selectedTrack, updateTrack, logOperation]);
 
   const handleRemoveEffect = useCallback((effectId) => {
+    const removedEffect = effects.find(e => e.id === effectId);
     const updatedClip = removeEffectFromClip(selectedClip, effectId);
     updateTrack(selectedClip.trackId, {
       clips: selectedTrack.clips.map(c => c.id === selectedClipId ? updatedClip : c)
     });
-  }, [selectedClip, selectedClipId, selectedTrack, updateTrack]);
+    if (logOperation) {
+      logOperation('effect_removed', { clipId: selectedClipId, effectId, effectType: removedEffect?.type });
+    }
+  }, [selectedClip, selectedClipId, selectedTrack, updateTrack, effects, logOperation]);
 
   const handleToggleEffect = useCallback((effectId) => {
+    const toggledEffect = effects.find(e => e.id === effectId);
     const updatedClip = toggleEffectEnabled(selectedClip, effectId);
     updateTrack(selectedClip.trackId, {
       clips: selectedTrack.clips.map(c => c.id === selectedClipId ? updatedClip : c)
     });
-  }, [selectedClip, selectedClipId, selectedTrack, updateTrack]);
+    if (logOperation) {
+      logOperation('effect_toggled', { clipId: selectedClipId, effectId, effectType: toggledEffect?.type, enabled: !toggledEffect?.enabled });
+    }
+  }, [selectedClip, selectedClipId, selectedTrack, updateTrack, effects, logOperation]);
 
   const handleReorderEffect = useCallback((effectId, direction) => {
     const effectIndex = effects.findIndex(e => e.id === effectId);
@@ -335,20 +343,28 @@ export default function ClipEffectsRack({ show, onHide, selectedClipId, logOpera
 
     if (targetIndex < 0 || targetIndex >= effects.length) return;
 
+    const reorderedEffect = effects.find(e => e.id === effectId);
     const updatedClip = reorderEffects(selectedClip, effectIndex, targetIndex);
     updateTrack(selectedClip.trackId, {
       clips: selectedTrack.clips.map(c => c.id === selectedClipId ? updatedClip : c)
     });
-  }, [selectedClip, selectedClipId, selectedTrack, updateTrack, effects]);
+    if (logOperation) {
+      logOperation('effect_reordered', { clipId: selectedClipId, effectId, effectType: reorderedEffect?.type, direction });
+    }
+  }, [selectedClip, selectedClipId, selectedTrack, updateTrack, effects, logOperation]);
 
   const handleClearAll = useCallback(() => {
     if (!confirm('Remove all effects from this clip?')) return;
 
+    const effectCount = effects.length;
     const updatedClip = clearAllEffects(selectedClip);
     updateTrack(selectedClip.trackId, {
       clips: selectedTrack.clips.map(c => c.id === selectedClipId ? updatedClip : c)
     });
-  }, [selectedClip, selectedClipId, selectedTrack, updateTrack]);
+    if (logOperation) {
+      logOperation('effects_cleared', { clipId: selectedClipId, effectCount });
+    }
+  }, [selectedClip, selectedClipId, selectedTrack, updateTrack, effects, logOperation]);
 
   const handleApplyPreset = useCallback((presetName) => {
     const updatedClip = applyEffectChainPreset(selectedClip, presetName);
