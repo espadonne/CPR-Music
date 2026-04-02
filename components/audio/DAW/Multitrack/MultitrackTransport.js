@@ -27,6 +27,7 @@ export default function MultitrackTransport({
   setShowPiano: setShowPianoProp,
   onPianoNoteHandler,
   onActiveNotesChange,
+  logOperation = null,
 }) {
   const {
     play,
@@ -367,20 +368,23 @@ export default function MultitrackTransport({
           e.preventDefault();
           if (isPlaying) {
             pause();
+            if (logOperation) logOperation('playback_paused', {});
           } else {
             play();
+            if (logOperation) logOperation('playback_started', {});
           }
           break;
         case 'Enter':
           e.preventDefault();
           stop();
+          if (logOperation) logOperation('playback_stopped', {});
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, play, pause, stop]);
+  }, [isPlaying, play, pause, stop, logOperation]);
 
   // Update volume on all tracks when master volume changes
   useEffect(() => {
@@ -436,8 +440,10 @@ export default function MultitrackTransport({
               try {
                 if (isPlaying) {
                   pause && pause();
+                  if (logOperation) logOperation('playback_paused', {});
                 } else {
                   play && play();
+                  if (logOperation) logOperation('playback_started', {});
                 }
               } catch (e) {
                 console.error('Transport error:', e);
@@ -460,6 +466,7 @@ export default function MultitrackTransport({
             onClick={() => {
               try {
                 stop && stop();
+                if (logOperation) logOperation('playback_stopped', {});
               } catch (e) {
                 console.error('Stop error:', e);
               }

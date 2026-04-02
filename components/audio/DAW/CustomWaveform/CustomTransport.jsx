@@ -32,7 +32,8 @@ export default function CustomTransport() {
     setPlaybackSpeed,
     zoomIn,
     zoomOut,
-    resetZoom
+    resetZoom,
+    logOperation
   } = useWaveform();
 
   // Undo/redo now handled in CustomTimeline
@@ -60,7 +61,10 @@ export default function CustomTransport() {
   const stopAndSeekZero = useCallback(() => {
     stop();
     seek(0);
-  }, [stop, seek]);
+    if (logOperation) {
+      logOperation('playback_stopped', {});
+    }
+  }, [stop, seek, logOperation]);
 
   // Playback speed options
   const speedOptions = [
@@ -84,8 +88,10 @@ export default function CustomTransport() {
           e.preventDefault();
           if (isPlaying) {
             pause();
+            if (logOperation) logOperation('playback_paused', {});
           } else {
             play();
+            if (logOperation) logOperation('playback_started', {});
           }
           break;
         case 'ArrowLeft':
@@ -118,7 +124,7 @@ export default function CustomTransport() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, currentTime, duration, play, pause, seek, skipBackward, skipForward]);
+  }, [isPlaying, currentTime, duration, play, pause, seek, skipBackward, skipForward, logOperation]);
 
   return (
     <div className="d-flex w-100 ml-auto mr-auto prog-bar align-items-center flex-between flex gap-0375">
@@ -132,7 +138,15 @@ export default function CustomTransport() {
         </Button>
         <Button
           className="prog-button"
-          onClick={isPlaying ? pause : play}
+          onClick={() => {
+            if (isPlaying) {
+              pause();
+              if (logOperation) logOperation('playback_paused', {});
+            } else {
+              play();
+              if (logOperation) logOperation('playback_started', {});
+            }
+          }}
           title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
         >
           {isPlaying ? <FaRegCirclePause fontSize={icoSize} /> : <FaRegCirclePlay fontSize={icoSize} />}
