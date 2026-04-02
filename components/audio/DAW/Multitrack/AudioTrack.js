@@ -54,6 +54,8 @@ function AudioTrack({ track, index, zoomLevel = 100, logOperation = null }) {
   // Refs
   const fileInputRef = useRef(null);
   const clipPlayerRef = useRef(null);
+  const volumeLogTimer = useRef(null);
+  const panLogTimer = useRef(null);
 
   // Use track.isRecording as single source of truth
   const isRecording = track.isRecording || false;
@@ -321,6 +323,9 @@ function AudioTrack({ track, index, zoomLevel = 100, logOperation = null }) {
   const handleRemove = () => {
     if (window.confirm('Remove this track?')) {
       removeTrack(track.id);
+      if (logOperation) {
+        logOperation('track_removed', { trackId: track.id, trackName: track.name });
+      }
     }
   };
 
@@ -684,6 +689,12 @@ function AudioTrack({ track, index, zoomLevel = 100, logOperation = null }) {
                     } catch (error) {
                       console.error('📊 Error logging volume change:', error);
                     }
+                    if (logOperation) {
+                      clearTimeout(volumeLogTimer.current);
+                      volumeLogTimer.current = setTimeout(() => {
+                        logOperation('mixing_volume', { trackId: track.id, volume: newVolume });
+                      }, 500);
+                    }
                   }}
                   onClick={(e) => e.stopPropagation()}
                   disabled={track.muted}
@@ -711,6 +722,12 @@ function AudioTrack({ track, index, zoomLevel = 100, logOperation = null }) {
                       }
                     } catch (error) {
                       console.error('📊 Error logging pan change:', error);
+                    }
+                    if (logOperation) {
+                      clearTimeout(panLogTimer.current);
+                      panLogTimer.current = setTimeout(() => {
+                        logOperation('mixing_pan', { trackId: track.id, pan: newPan });
+                      }, 500);
                     }
                   }}
                   onClick={(e) => e.stopPropagation()}
@@ -765,6 +782,9 @@ function AudioTrack({ track, index, zoomLevel = 100, logOperation = null }) {
                   }
                 } catch (error) {
                   console.error('📊 Error logging mute toggle:', error);
+                }
+                if (logOperation) {
+                  logOperation('mixing_mute', { trackId: track.id, muted: newMutedState });
                 }
               }}
               title={
