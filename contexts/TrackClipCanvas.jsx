@@ -627,9 +627,12 @@ export default function TrackClipCanvas({ track, zoomLevel = 100, height = 100, 
         return { ...t, clips: nextClips };
       }));
 
-      // Log for study protocol (Activity 3) - only for move operations
+      // Log for study protocol (Activity 3) - move and trim operations
       if (op === 'move' && logOperation) {
         logOperation('clip_move', { trackId: track.id, clipIndex: idx, newStart: p.start });
+      }
+      if ((op === 'resizeL' || op === 'resizeR') && logOperation) {
+        logOperation('clip_trimmed', { trackId: track.id, clipIndex: idx, edge: op === 'resizeL' ? 'left' : 'right', newStart: p.start, newDuration: p.duration });
       }
 
       draw();
