@@ -419,8 +419,11 @@ export default function MultitrackEditor({ availableTakes: propTakes = [], logOp
       } catch (error) {
         console.error('📊 Error logging split operation:', error);
       }
+      if (logOperation) {
+        logOperation('clip_split', { splitTime: currentTime, clipsAffected });
+      }
     }
-  }, [tracks, currentTime, updateTrack]);
+  }, [tracks, currentTime, updateTrack, logOperation]);
 
   // Handle duplicate
   const handleDuplicate = useCallback(() => {
@@ -953,11 +956,12 @@ export default function MultitrackEditor({ availableTakes: propTakes = [], logOp
       {/* Transport Controls - MOVED TO TOP */}
       <Row className="mb-2">
         <Col>
-          <MultitrackTransport 
+          <MultitrackTransport
             showPiano={showPiano}
             setShowPiano={setShowPiano}
             onPianoNoteHandler={(handler) => { pianoNoteHandlerRef.current = handler; }}
             onActiveNotesChange={setActiveNotes}
+            logOperation={logOperation}
           />
         </Col>
       </Row>
