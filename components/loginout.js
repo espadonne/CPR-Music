@@ -15,7 +15,7 @@ function LoginOut() {
   }, [session, currentUserInfo.loaded]);
   // const loginStatus = useSelector((state) => state.loginStatus);
   return session ? (
-    <Link href="/api/auth/signout" passHref legacyBehavior>
+    <Link href="/auth/signout" passHref legacyBehavior>
       <Nav.Link>
         Logout
         {currentUserInfo.loaded ? ` ${currentUserInfo.username}` : ''}

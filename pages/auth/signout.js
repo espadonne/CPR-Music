@@ -12,9 +12,9 @@ function SignOut() {
 
   const { data: session } = useSession();
   const dispatch = useDispatch();
-  const logout = (ev) => {
+  const logout = async (ev) => {
     dispatch(logoutUser(session.djangoToken));
-    signOut();
+    await signOut();
     router.push('/');
   };
   return (
