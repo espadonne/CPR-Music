@@ -21,6 +21,7 @@ jobs:
         run: npx @opennextjs/cloudflare build
         env:
           NEXT_PUBLIC_BACKEND_HOST: ${{ vars.PROD_NEXT_PUBLIC_BACKEND_HOST }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Deploy
         run: |
